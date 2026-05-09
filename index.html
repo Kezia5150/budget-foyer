@@ -412,7 +412,7 @@
     <div class="export-desc">Connecte-toi pour sauvegarder et restaurer tes données sur Drive.</div>
     <div class="drive-status off" id="driveStatus">Non connecté</div><br>
     <button class="btn-export primary" onclick="signInGoogle()" id="btnDriveConnect">Se connecter avec Google</button>
-    <button class="btn-export secondary" onclick="saveToDrive()" id="btnSave" style="display:none">⬆️ Sauvegarder</button>
+    <button class="btn-export secondary" onclick="saveToDrive(true)" id="btnSave" style="display:none">⬆️ Sauvegarder</button>
     <button class="btn-export secondary" onclick="restoreFromDrive()" id="btnRestore" style="display:none">⬇️ Restaurer</button>
     <button class="btn-export danger" onclick="signOutGoogle()" id="btnSignOut" style="display:none">Se déconnecter</button>
   </div>
@@ -863,10 +863,16 @@ function updateDriveUI(connected){
   document.getElementById('btnRestore').style.display=connected?'flex':'none';
   document.getElementById('btnSignOut').style.display=connected?'flex':'none';
 }
-async function saveToDrive(){
-  if(!accessToken){alert("Connecte-toi d'abord.");return;}
+async function saveToDrive(showAlert=false){
+  if(!accessToken) return;
   const data=JSON.stringify({expenses,archives,customKw,savedAt:new Date().toISOString()});
   try{
+    // Récupérer le fileId si on ne l'a pas encore
+    if(!driveFileId){
+      const search=await fetch("https://www.googleapis.com/drive/v3/files?q=name='budget-foyer-data.json'&fields=files(id)",{headers:{Authorization:'Bearer '+accessToken}});
+      const res=await search.json();
+      if(res.files&&res.files.length) driveFileId=res.files[0].id;
+    }
     let resp;
     if(driveFileId){
       resp=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`,{method:'PATCH',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:data});
@@ -878,9 +884,9 @@ async function saveToDrive(){
       resp=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form});
     }
     const result=await resp.json();
-    if(result.id){driveFileId=result.id; alert('✅ Sauvegardé sur Drive !');}
-    else alert('Erreur : '+JSON.stringify(result));
-  }catch(e){alert('Erreur : '+e.message);}
+    if(result.id) driveFileId=result.id;
+    if(showAlert) alert('✅ Sauvegardé sur Drive !');
+  }catch(e){ if(showAlert) alert('Erreur : '+e.message); }
 }
 async function restoreFromDrive(){
   if(!accessToken){alert("Connecte-toi d'abord.");return;}
