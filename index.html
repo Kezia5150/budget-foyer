@@ -596,6 +596,7 @@ function addExpense() {
   const fl=document.getElementById('flash');
   fl.classList.add('show'); setTimeout(()=>fl.classList.remove('show'),400);
   if(navigator.vibrate) navigator.vibrate(30);
+  if(accessToken) saveToDrive();
 }
 
 function deleteExpense(id) {
