@@ -852,6 +852,8 @@ function initGoogleDrive(){
     client_id:CLIENT_ID, scope:SCOPES,
     callback:(resp)=>{ if(!resp.error){ accessToken=resp.access_token; updateDriveUI(true); } }
   });
+  // Tentative de reconnexion silencieuse
+  tokenClient.requestAccessToken({prompt:'none'});
 }
 function signInGoogle(){ if(!tokenClient) initGoogleDrive(); tokenClient.requestAccessToken(); }
 function signOutGoogle(){ if(accessToken) google.accounts.oauth2.revoke(accessToken); accessToken=null; driveFileId=null; updateDriveUI(false); }
