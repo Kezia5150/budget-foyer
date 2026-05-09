@@ -850,13 +850,20 @@ function initGoogleDrive(){
   if(typeof google==='undefined') return;
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:CLIENT_ID, scope:SCOPES,
-    callback:(resp)=>{ if(!resp.error){ accessToken=resp.access_token; updateDriveUI(true); } }
+    callback:(resp)=>{
+      if(!resp.error){
+        accessToken=resp.access_token;
+        localStorage.setItem('bf_drive_token', accessToken);
+        updateDriveUI(true);
+      }
+    }
   });
-  // Tentative de reconnexion silencieuse
-  tokenClient.requestAccessToken({prompt:'none'});
+  // Relire le token sauvegardé
+  const saved=localStorage.getItem('bf_drive_token');
+  if(saved){ accessToken=saved; updateDriveUI(true); }
 }
 function signInGoogle(){ if(!tokenClient) initGoogleDrive(); tokenClient.requestAccessToken(); }
-function signOutGoogle(){ if(accessToken) google.accounts.oauth2.revoke(accessToken); accessToken=null; driveFileId=null; updateDriveUI(false); }
+function signOutGoogle(){ if(accessToken) google.accounts.oauth2.revoke(accessToken); accessToken=null; driveFileId=null; localStorage.removeItem('bf_drive_token'); updateDriveUI(false); }
 function updateDriveUI(connected){
   document.getElementById('driveStatus').className='drive-status '+(connected?'ok':'off');
   document.getElementById('driveStatus').textContent=connected?'✓ Connecté':'Non connecté';
