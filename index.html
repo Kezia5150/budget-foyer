@@ -20,7 +20,7 @@
   body{font-family:'Raleway',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;}
   body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(160deg,#F4E7F8 0%,#fdf8ff 40%,#fdf8ff 100%);z-index:-1;opacity:0.7;}
 
-  .header{padding:16px 24px 14px;position:sticky;top:0;z-index:101;background:rgba(253,248,255,0.95);border-bottom:1px solid var(--border);}
+  .header{padding:16px 24px 14px;position:sticky;top:0;z-index:101;background:rgba(253,248,255,0.95);border-bottom:1px solid var(--border);min-height:75px;}
   .header-top{display:flex;justify-content:space-between;align-items:center;}
   .app-name{font-family:'Raleway',sans-serif;font-size:21px;font-weight:900;color:var(--text);}
   .app-name span{font-family:'Crimson Text',serif;font-style:italic;font-weight:400;font-size:26px;color:var(--deep);}
@@ -29,7 +29,7 @@
   .header-total-label{font-family:'Crimson Text',serif;font-size:14px;color:var(--muted);font-style:italic;}
   .header-total-amount{font-family:'Raleway',sans-serif;font-size:21px;font-weight:800;color:var(--deep);}
 
-  .tabs{display:flex;gap:6px;padding:12px 20px;overflow-x:auto;scrollbar-width:none;background:rgba(253,248,255,0.95);position:sticky;top:80px;z-index:100;border-bottom:1px solid var(--border);}
+  .tabs{display:flex;gap:6px;padding:12px 20px 12px 20px;overflow-x:auto;scrollbar-width:none;background:rgba(253,248,255,0.95);position:sticky;top:75px;z-index:100;border-bottom:1px solid var(--border);-webkit-overflow-scrolling:touch;}
   .tabs::-webkit-scrollbar{display:none;}
   .tab{padding:7px 15px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
   .tab.active{background:linear-gradient(135deg,var(--mauve),var(--violet));border-color:transparent;color:#fff;}
@@ -726,13 +726,23 @@ function updateAll(){updateHeader();renderListe();renderFilters();renderStats();
 function switchTab(name,el){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('screen-'+name).classList.add('active');el.classList.add('active');
+  document.getElementById('screen-'+name).classList.add('active');
+  el.classList.add('active');
+  el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'nearest'});
 }
 
 // XLSX + Google Identity
 const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';document.head.appendChild(sc);
 const gsi=document.createElement('script');gsi.src='https://accounts.google.com/gsi/client';gsi.onload=initGoogleDrive;document.head.appendChild(gsi);
 
+// Ajuster top des tabs selon hauteur réelle du header
+function adjustTabsTop(){
+  const h=document.querySelector('.header');
+  const tabs=document.querySelector('.tabs');
+  if(h&&tabs){tabs.style.top=h.offsetHeight+'px';}
+}
+adjustTabsTop();
+window.addEventListener('resize',adjustTabsTop);
 updateAll();renderArchives();checkNewMonth();
 </script>
 </body>
